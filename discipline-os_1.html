@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DISCIPLINE OS — 5AM to 10PM Protocol</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080810;--surface:#0f0f1a;--border:#1e1e35;
+  --accent:#e63946;--accent2:#f4a261;--accent3:#2a9d8f;
+  --text:#d4d4e8;--muted:#6b6b8a;--white:#f0f0ff;
+  --mono:'IBM Plex Mono',monospace;--display:'Bebas Neue',sans-serif;--body:'DM Sans',sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--body);line-height:1.6;min-height:100vh}
+.app{
+  background:var(--bg);
+  background-image:
+    radial-gradient(ellipse 80% 40% at 50% -10%,rgba(230,57,70,.08) 0%,transparent 60%),
+    repeating-linear-gradient(0deg,transparent,transparent 60px,rgba(255,255,255,.015) 60px,rgba(255,255,255,.015) 61px),
+    repeating-linear-gradient(90deg,transparent,transparent 60px,rgba(255,255,255,.015) 60px,rgba(255,255,255,.015) 61px);
+  min-height:100vh;
+}
+
+/* NAV */
+.nav{
+  position:sticky;top:0;z-index:100;
+  background:rgba(8,8,16,.95);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:0 20px;display:flex;align-items:center;gap:4px;
+  overflow-x:auto;scrollbar-width:none;
+}
+.nav::-webkit-scrollbar{display:none}
+.nav-logo{font-family:var(--display);font-size:18px;letter-spacing:2px;color:var(--white);margin-right:12px;white-space:nowrap;flex-shrink:0}
+.nav-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 1.5s infinite;flex-shrink:0;margin-right:8px}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.nav-tab{
+  background:none;border:none;cursor:pointer;
+  padding:14px 14px;
+  font-family:var(--mono);font-size:10px;letter-spacing:1px;
+  color:var(--muted);border-bottom:2px solid transparent;
+  white-space:nowrap;transition:color .2s,border-color .2s;text-transform:uppercase;
+}
+.nav-tab:hover{color:var(--text)}
+.nav-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* HERO */
+.hero{padding:60px 20px 48px;max-width:860px;margin:0 auto;text-align:center}
+.hero-tag{
+  display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:2px;
+  color:var(--accent);background:rgba(230,57,70,.1);border:1px solid rgba(230,57,70,.25);
+  padding:5px 14px;border-radius:2px;text-transform:uppercase;margin-bottom:20px;
+}
+.hero h1{font-family:var(--display);font-size:clamp(48px,10vw,88px);letter-spacing:4px;line-height:.9;color:var(--white);margin-bottom:14px}
+.hero h1 span{color:var(--accent)}
+.hero-sub{font-size:15px;color:var(--muted);max-width:540px;margin:0 auto;font-weight:300}
+.hero-stats{
+  display:flex;justify-content:center;border:1px solid var(--border);border-radius:4px;
+  overflow:hidden;max-width:520px;margin:36px auto 0;
+}
+.stat{flex:1;padding:18px 12px;text-align:center;border-right:1px solid var(--border)}
+.stat:last-child{border-right:none}
+.stat-val{font-family:var(--display);font-size:34px;letter-spacing:2px;color:var(--accent);line-height:1}
+.stat-label{font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-top:4px}
+
+/* CONTENT */
+.content{max-width:860px;margin:0 auto;padding:0 20px 80px}
+.tab-content{animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.hidden{display:none}
+
+/* SECTION HEADER */
+.section{margin-bottom:56px}
+.section-header{display:flex;align-items:center;gap:14px;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.section-num{font-family:var(--mono);font-size:10px;color:var(--accent);background:rgba(230,57,70,.1);border:1px solid rgba(230,57,70,.2);padding:4px 10px;border-radius:2px;letter-spacing:1px;flex-shrink:0}
+.section-title{font-family:var(--display);font-size:28px;letter-spacing:2px;color:var(--white)}
+.section-desc{font-size:13px;color:var(--muted);margin-top:4px}
+
+/* ANCHOR CARDS */
+.anchor-grid{display:grid;gap:10px}
+.anchor-card{
+  background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);
+  border-radius:4px;padding:18px 20px;display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start;
+  transition:background .2s,border-left-color .2s;
+}
+.anchor-card:hover{background:#12121f;border-left-color:var(--accent2)}
+.anchor-icon{font-size:18px;padding-top:2px}
+.anchor-name{font-family:var(--mono);font-size:12px;color:var(--accent2);font-weight:600;margin-bottom:6px}
+.anchor-desc{font-size:13px;color:var(--text);line-height:1.6}
+.anchor-why{font-size:12px;color:var(--muted);margin-top:6px;font-style:italic}
+
+/* NEURO CARDS */
+.neuro-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:600px){.neuro-grid{grid-template-columns:1fr}}
+.neuro-card{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:16px}
+.neuro-label{font-family:var(--mono);font-size:10px;color:var(--accent3);letter-spacing:1px;margin-bottom:6px;text-transform:uppercase}
+.neuro-title{font-size:14px;font-weight:600;color:var(--white);margin-bottom:5px}
+.neuro-desc{font-size:13px;color:var(--muted);line-height:1.5}
+
+/* TIMELINE */
+.timeline{position:relative}
+.timeline::before{content:'';position:absolute;left:58px;top:0;bottom:0;width:1px;background:linear-gradient(to bottom,var(--accent) 0%,var(--border) 30%,var(--border) 70%,transparent 100%)}
+.tl-block{display:flex;gap:0;margin-bottom:3px}
+.tl-time{width:58px;flex-shrink:0;font-family:var(--mono);font-size:10px;color:var(--muted);padding:16px 10px 0 0;text-align:right;line-height:1}
+.tl-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;margin:14px 0 0;position:relative;z-index:1}
+.tl-card{flex:1;margin-left:14px;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:10px 14px;margin-bottom:3px}
+.tl-title{font-family:var(--mono);font-size:11px;font-weight:600;margin-bottom:3px;letter-spacing:.5px}
+.tl-desc{font-size:12px;color:var(--muted);line-height:1.5}
+.tl-tag{display:inline-block;font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:2px;margin-top:5px;letter-spacing:.5px}
+
+/* LEGEND */
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:18px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:4px}
+.legend-item{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10px;color:var(--muted)}
+.legend-dot{width:7px;height:7px;border-radius:50%}
+
+/* FRICTION */
+.friction-card{background:var(--surface);border:1px solid var(--border);border-radius:4px;overflow:hidden;margin-bottom:10px}
+.friction-header{padding:14px 18px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:background .2s}
+.friction-header:hover{background:rgba(255,255,255,.03)}
+.friction-badge{font-family:var(--mono);font-size:10px;letter-spacing:1px;padding:3px 9px;border-radius:2px;text-transform:uppercase;flex-shrink:0}
+.badge-high{background:rgba(230,57,70,.15);color:var(--accent);border:1px solid rgba(230,57,70,.2)}
+.badge-med{background:rgba(244,162,97,.15);color:var(--accent2);border:1px solid rgba(244,162,97,.2)}
+.friction-name{font-size:14px;font-weight:500;color:var(--white);flex:1}
+.friction-arrow{color:var(--muted);transition:transform .25s;font-size:12px;flex-shrink:0}
+.friction-arrow.open{transform:rotate(180deg)}
+.friction-body{padding:14px 18px 18px;border-top:1px solid var(--border);display:none}
+.friction-body.open{display:block}
+.friction-science{font-size:13px;color:var(--muted);margin-bottom:10px;font-style:italic;line-height:1.6}
+.protocol-list{list-style:none}
+.protocol-list li{padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px;color:var(--text);display:flex;gap:9px;align-items:flex-start;line-height:1.5}
+.protocol-list li:last-child{border-bottom:none}
+.protocol-list li::before{content:'→';color:var(--accent2);flex-shrink:0;margin-top:1px}
+
+/* LAW GRID */
+.law-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:24px}
+@media(max-width:600px){.law-grid{grid-template-columns:1fr}}
+.law-card{background:rgba(230,57,70,.05);border:1px solid rgba(230,57,70,.15);border-radius:4px;padding:14px 16px}
+.law-num{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:1px;margin-bottom:5px}
+.law-title{font-size:14px;font-weight:600;color:var(--white);margin-bottom:4px}
+.law-desc{font-size:12px;color:var(--muted);line-height:1.5}
+
+/* METRICS */
+.metrics-card{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:20px}
+.metrics-title{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:1px;margin-bottom:18px;text-transform:uppercase}
+.metric-row{display:flex;align-items:flex-start;gap:14px;padding:11px 0;border-bottom:1px solid var(--border)}
+.metric-row:last-child{border-bottom:none}
+.metric-icon{font-size:15px;flex-shrink:0;padding-top:2px}
+.metric-name{font-family:var(--mono);font-size:11px;color:var(--accent2);flex-shrink:0;width:150px;padding-top:2px}
+.metric-desc{font-size:13px;color:var(--text)}
+.metric-why{font-size:11px;color:var(--muted);margin-top:3px}
+
+/* ACCOUNTABILITY */
+.acc-grid{display:grid;gap:10px;margin-top:20px}
+.acc-card{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:16px 20px;display:grid;grid-template-columns:auto 1fr;gap:12px}
+.acc-icon{font-size:16px;padding-top:2px}
+.acc-name{font-family:var(--mono);font-size:11px;margin-bottom:5px}
+.acc-desc{font-size:13px;color:var(--text);line-height:1.5}
+
+/* TEMPLATE */
+.template-box{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:18px;margin-top:24px}
+.template-label{font-family:var(--mono);font-size:11px;color:var(--accent3);letter-spacing:1px;margin-bottom:12px;text-transform:uppercase}
+pre{font-family:var(--mono);font-size:12px;color:var(--text);line-height:1.9;white-space:pre-wrap;background:rgba(0,0,0,.35);padding:16px;border-radius:4px}
+
+/* WARNING */
+.warn{background:rgba(230,57,70,.06);border:1px solid rgba(230,57,70,.2);border-radius:4px;padding:14px 18px;margin-top:24px;font-size:13px;color:var(--text);line-height:1.6}
+.warn strong{color:var(--accent);font-family:var(--mono);font-size:11px;letter-spacing:1px;display:block;margin-bottom:7px}
+
+/* BLOCK COLORS */
+.dot-deep{background:var(--accent);box-shadow:0 0 7px rgba(230,57,70,.5)}
+.dot-rest{background:var(--accent3);box-shadow:0 0 7px rgba(42,157,143,.5)}
+.dot-fuel{background:var(--accent2);box-shadow:0 0 7px rgba(244,162,97,.5)}
+.dot-anchor{background:#a78bfa;box-shadow:0 0 7px rgba(167,139,250,.5)}
+.title-deep{color:var(--accent)}.title-rest{color:var(--accent3)}.title-fuel{color:var(--accent2)}.title-anchor{color:#a78bfa}
+.tag-deep{background:rgba(230,57,70,.15);color:var(--accent)}
+.tag-rest{background:rgba(42,157,143,.15);color:var(--accent3)}
+.tag-fuel{background:rgba(244,162,97,.15);color:var(--accent2)}
+.tag-anchor{background:rgba(167,139,250,.15);color:#a78bfa}
+.ld-deep{background:var(--accent)}.ld-rest{background:var(--accent3)}.ld-fuel{background:var(--accent2)}.ld-anchor{background:#a78bfa}
+
+/* POMODORO */
+.pomo-wrap{display:flex;flex-direction:column;align-items:center;gap:32px;padding:20px 0}
+.pomo-modes{display:flex;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:5px}
+.pomo-mode-btn{
+  background:none;border:none;cursor:pointer;
+  font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--muted);padding:7px 18px;border-radius:2px;transition:all .2s;
+}
+.pomo-mode-btn.active{background:var(--accent);color:var(--white)}
+.pomo-clock-wrap{position:relative;width:260px;height:260px;flex-shrink:0}
+.pomo-svg{transform:rotate(-90deg)}
+.pomo-track{fill:none;stroke:var(--border);stroke-width:8}
+.pomo-progress{fill:none;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset .9s linear,stroke .4s}
+.pomo-center{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+}
+.pomo-time{font-family:var(--display);font-size:62px;letter-spacing:3px;color:var(--white);line-height:1}
+.pomo-label{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--muted);margin-top:6px;text-transform:uppercase}
+.pomo-controls{display:flex;gap:12px;align-items:center}
+.pomo-btn{
+  background:var(--surface);border:1px solid var(--border);border-radius:4px;cursor:pointer;
+  font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--text);padding:12px 28px;transition:all .2s;
+}
+.pomo-btn:hover{border-color:var(--accent);color:var(--accent)}
+.pomo-btn.primary{background:var(--accent);border-color:var(--accent);color:var(--white);font-size:13px;padding:13px 38px}
+.pomo-btn.primary:hover{background:#c1121f}
+.pomo-sessions{display:flex;gap:8px;align-items:center}
+.pomo-dot{width:10px;height:10px;border-radius:50%;border:1px solid var(--border);background:transparent;transition:background .3s}
+.pomo-dot.done{background:var(--accent)}
+.pomo-stats-row{display:flex;gap:0;border:1px solid var(--border);border-radius:4px;overflow:hidden;width:100%;max-width:420px}
+.pomo-stat{flex:1;padding:14px 10px;text-align:center;border-right:1px solid var(--border)}
+.pomo-stat:last-child{border-right:none}
+.pomo-stat-val{font-family:var(--display);font-size:26px;letter-spacing:2px;color:var(--accent)}
+.pomo-stat-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:3px}
+.pomo-settings{width:100%;max-width:420px;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:18px}
+.pomo-settings-title{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:16px}
+.pomo-setting-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
+.pomo-setting-row:last-child{border-bottom:none}
+.pomo-setting-label{font-size:13px;color:var(--text)}
+.pomo-setting-controls{display:flex;align-items:center;gap:10px}
+.pomo-adj{background:none;border:1px solid var(--border);color:var(--text);border-radius:2px;width:26px;height:26px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:border-color .2s}
+.pomo-adj:hover{border-color:var(--accent);color:var(--accent)}
+.pomo-adj-val{font-family:var(--mono);font-size:13px;color:var(--white);min-width:32px;text-align:center}
+.pomo-kbd{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:8px}
+.pomo-kbd kbd{background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:2px 7px;font-family:var(--mono);font-size:10px;color:var(--text)}
+</style>
+</head>
+<body>
+<div class="app">
+
+<nav class="nav">
+  <div class="nav-logo">DISCIPLINE OS</div>
+  <div class="nav-dot"></div>
+  <button class="nav-tab active" onclick="switchTab('blocks',this)">01 · Starting Blocks</button>
+  <button class="nav-tab" onclick="switchTab('architecture',this)">02 · Study Architecture</button>
+  <button class="nav-tab" onclick="switchTab('friction',this)">03 · Friction Protocols</button>
+  <button class="nav-tab" onclick="switchTab('protocol',this)">04 · Daily Protocol</button>
+  <button class="nav-tab" onclick="switchTab('pomodoro',this)">05 · Pomodoro</button>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">⚡ ELITE PERFORMANCE SYSTEM · BAC PREPARATION MODE</div>
+  <h1>5 AM TO<br><span>10 PM</span><br>PROTOCOL</h1>
+  <p class="hero-sub">A neuroscience-backed operating system for unbreakable daily discipline. 8 deep work blocks. 12 hours of structured execution. Zero tolerance for drift.</p>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-val">17</div><div class="stat-label">Waking Hours</div></div>
+    <div class="stat"><div class="stat-val">8</div><div class="stat-label">Deep Blocks</div></div>
+    <div class="stat"><div class="stat-val">12</div><div class="stat-label">Study Hours</div></div>
+    <div class="stat"><div class="stat-val">7</div><div class="stat-label">Sleep Hours</div></div>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- TAB 1: STARTING BLOCKS -->
+<div id="tab-blocks" class="tab-content">
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">MODULE 01</span>
+      <div><div class="section-title">THE STARTING BLOCKS</div><div class="section-desc">Non-negotiable anchors. These execute before anything else.</div></div>
+    </div>
+    <div class="anchor-grid">
+      <div class="anchor-card">
+        <div class="anchor-icon">⏰</div>
+        <div>
+          <div class="anchor-name">5:00 AM — HARD ALARM. NO SNOOZE.</div>
+          <div class="anchor-desc">Phone across the room, set at 5:00 AM sharp. The moment the alarm fires, you stand up. Sitting on the edge of the bed is defeat. First movement = standing. Non-negotiable.</div>
+          <div class="anchor-why">↳ Neuroscience: The first decision of the day primes your dopamine system. Choosing difficulty first creates a momentum loop that cascades into the entire day.</div>
+        </div>
+      </div>
+      <div class="anchor-card">
+        <div class="anchor-icon">💧</div>
+        <div>
+          <div class="anchor-name">0–5 MIN · Hydration Activation</div>
+          <div class="anchor-desc">500ml of cold water immediately. Nothing else enters your body first. Cold water spikes noradrenaline and cortisol to appropriate morning levels — it is a biological ON switch.</div>
+          <div class="anchor-why">↳ You lose ~800ml of water overnight. Dehydration by even 1-2% measurably degrades working memory and focus.</div>
+        </div>
+      </div>
+      <div class="anchor-card">
+        <div class="anchor-icon">🌅</div>
+        <div>
+          <div class="anchor-name">5–15 MIN · Morning Light Exposure</div>
+          <div class="anchor-desc">Get sunlight in your eyes within the first 15 minutes. Step outside, open a window, or use bright indoor light. No sunglasses. Look toward (not at) the sky.</div>
+          <div class="anchor-why">↳ This triggers the suprachiasmatic nucleus — your master biological clock. It starts a 12-16 hour timer for peak alertness and regulates evening melatonin. This single habit stabilizes your entire sleep-wake architecture.</div>
+        </div>
+      </div>
+      <div class="anchor-card">
+        <div class="anchor-icon">🚫</div>
+        <div>
+          <div class="anchor-name">NO PHONE FOR 60 MINUTES</div>
+          <div class="anchor-desc">Your first hour is a content-free zone. No Instagram, no YouTube, no messages. Your brain in the first hour is highly neuroplastic. Whatever you expose it to will be absorbed deeply. Protect it.</div>
+          <div class="anchor-why">↳ Morning phone use floods the prefrontal cortex with reactive information before it's fully online, triggering a context-switching tax you'll pay all day.</div>
+        </div>
+      </div>
+      <div class="anchor-card">
+        <div class="anchor-icon">📋</div>
+        <div>
+          <div class="anchor-name">5:20 AM · The Daily Execution Sheet</div>
+          <div class="anchor-desc">Write 3 things: today's single most important study objective, the exact chapters/exercises you will cover, and one potential obstacle with a pre-planned response. 5 minutes. Acts as a cognitive contract.</div>
+          <div class="anchor-why">↳ Implementation intentions (if-then planning) increase goal follow-through by 200-300% per Gollwitzer's research at NYU.</div>
+        </div>
+      </div>
+      <div class="anchor-card">
+        <div class="anchor-icon">🧠</div>
+        <div>
+          <div class="anchor-name">5:30 AM · First Deep Work Block BEGINS</div>
+          <div class="anchor-desc">No warm-up, no easing in. You open the book and you start. Your brain doesn't need to be "ready." Readiness is built by starting. The first 5 minutes are always friction — push through them.</div>
+          <div class="anchor-why">↳ Zeigarnik effect: the brain obsesses over incomplete tasks. Starting creates automatic cognitive pull toward completion.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:32px">
+      <div class="section-header" style="margin-bottom:16px">
+        <span class="section-num">NEURO STACK</span>
+        <div class="section-title" style="font-size:22px">SCIENCE BEHIND THE SYSTEM</div>
+      </div>
+      <div class="neuro-grid">
+        <div class="neuro-card"><div class="neuro-label">DOPAMINE</div><div class="neuro-title">Front-Load Difficulty</div><div class="neuro-desc">Do hardest material first when dopamine baseline is highest. Don't start with easy problems — that spends your peak state on low-value work.</div></div>
+        <div class="neuro-card"><div class="neuro-label">NEUROPLASTICITY</div><div class="neuro-title">Spaced Repetition</div><div class="neuro-desc">Reviewing material at increasing intervals (1 day, 3 days, 7 days) forces memory consolidation. One hour of spaced rep beats 4 hours of re-reading.</div></div>
+        <div class="neuro-card"><div class="neuro-label">FOCUS SYSTEM</div><div class="neuro-title">90-Min Ultradian Cycles</div><div class="neuro-desc">The brain operates in 90-minute alertness cycles. Each deep work block is calibrated to this rhythm. Breaks between blocks are not laziness — they are biology.</div></div>
+        <div class="neuro-card"><div class="neuro-label">MEMORY</div><div class="neuro-title">Active Recall Over Re-reading</div><div class="neuro-desc">Close the book and write what you know. Then check. Error correction is 4x more effective for memory encoding than passive review.</div></div>
+      </div>
+    </div>
+
+    <div class="warn">
+      <strong>⚠ HARD TRUTH</strong>
+      You will not feel motivated every morning. The days you want to sleep in are exactly the days that determine whether you pass this exam. Motivation is weather — it changes. The schedule is infrastructure — it doesn't.
+    </div>
+  </div>
+</div>
+
+<!-- TAB 2: ARCHITECTURE -->
+<div id="tab-architecture" class="tab-content hidden">
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">MODULE 02</span>
+      <div><div class="section-title">12-HOUR ARCHITECTURE</div><div class="section-desc">8 deep work blocks calibrated to 90-min ultradian brain cycles.</div></div>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot ld-deep"></div>DEEP WORK</div>
+      <div class="legend-item"><div class="legend-dot ld-rest"></div>REST / RECOVERY</div>
+      <div class="legend-item"><div class="legend-dot ld-fuel"></div>NUTRITION</div>
+      <div class="legend-item"><div class="legend-dot ld-anchor"></div>ANCHOR HABIT</div>
+    </div>
+    <div class="timeline" id="timeline"></div>
+    <div class="warn">
+      <strong>📐 ARCHITECTURE PRINCIPLE</strong>
+      The hardest material goes in Blocks 1, 3, and 5. Your brain's peak neurochemical state (high acetylcholine + dopamine) occurs in the first 4-6 hours of waking. Don't waste that on review. Save easy tasks for the afternoon blocks when cognitive bandwidth naturally narrows.
+    </div>
+  </div>
+</div>
+
+<!-- TAB 3: FRICTION -->
+<div id="tab-friction" class="tab-content hidden">
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">MODULE 03</span>
+      <div><div class="section-title">FRICTION PROTOCOLS</div><div class="section-desc">The exact obstacles that will hit you — and the science-backed counters.</div></div>
+    </div>
+    <div id="friction-list"></div>
+
+    <div style="margin-top:32px">
+      <div class="section-header" style="margin-bottom:14px">
+        <span class="section-num">IRON LAWS</span>
+        <div class="section-title" style="font-size:22px">OPERATING PRINCIPLES</div>
+      </div>
+      <div class="law-grid">
+        <div class="law-card"><div class="law-num">LAW 01</div><div class="law-title">Identity Over Willpower</div><div class="law-desc">Don't say "I am trying to study." Say "I am a student who studies 8 blocks per day." Behavior follows identity. Willpower is finite. Identity is persistent.</div></div>
+        <div class="law-card"><div class="law-num">LAW 02</div><div class="law-title">Failure Has a Protocol</div><div class="law-desc">Miss a block? Don't spiral. Activate the protocol: identify why, adjust tomorrow, maintain the chain. You need a fast recovery, not a perfect record.</div></div>
+        <div class="law-card"><div class="law-num">LAW 03</div><div class="law-title">Progress Is Non-Linear</div><div class="law-desc">Days 1-3: high energy. Days 4-7: resistance. Day 14: starts to feel automatic. Trust the timeline. Neuroplasticity takes 21-66 days of consistent execution.</div></div>
+        <div class="law-card"><div class="law-num">LAW 04</div><div class="law-title">Environment Beats Willpower</div><div class="law-desc">Design your environment to make the right choice the only easy choice. Book open = study. Phone hidden = focus. These are not hacks — they are how high performers actually operate.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 4: PROTOCOL -->
+<div id="tab-protocol" class="tab-content hidden">
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">MODULE 04</span>
+      <div><div class="section-title">DAILY PROTOCOL</div><div class="section-desc">What you report. How accountability works. How we correct failures.</div></div>
+    </div>
+
+    <div class="metrics-card">
+      <div class="metrics-title">// DAILY REPORT METRICS — SUBMIT EVERY EVENING</div>
+      <div class="metric-row"><div class="metric-icon">✅</div><div class="metric-name">BLOCKS_COMPLETED</div><div><div class="metric-desc">How many of the 8 deep work blocks did you fully execute?</div><div class="metric-why">↳ Non-negotiable baseline. Below 6 = failed day requiring analysis.</div></div></div>
+      <div class="metric-row"><div class="metric-icon">🕔</div><div class="metric-name">WAKE_TIME</div><div><div class="metric-desc">Exact time you got out of bed.</div><div class="metric-why">↳ Tracks schedule integrity. Anything past 5:15 AM = corrective protocol required.</div></div></div>
+      <div class="metric-row"><div class="metric-icon">🧠</div><div class="metric-name">FOCUS_QUALITY</div><div><div class="metric-desc">Rate your focus 1-10 for each major block.</div><div class="metric-why">↳ Reveals patterns: which blocks are hardest, which days crash.</div></div></div>
+      <div class="metric-row"><div class="metric-icon">📚</div><div class="metric-name">MATERIAL_COVERED</div><div><div class="metric-desc">Exact chapters, exercises, and problems completed.</div><div class="metric-why">↳ Makes progress tangible. Vague progress = invisible regression.</div></div></div>
+      <div class="metric-row"><div class="metric-icon">😴</div><div class="metric-name">SLEEP_HOURS</div><div><div class="metric-desc">Actual hours slept and sleep quality 1-10.</div><div class="metric-why">↳ Sleep data predicts next-day performance more than any other variable.</div></div></div>
+      <div class="metric-row"><div class="metric-icon">⚡</div><div class="metric-name">ENERGY_CURVE</div><div><div class="metric-desc">Mark energy level (1-10) at 9AM, 1PM, 5PM, 9PM.</div><div class="metric-why">↳ Diagnoses nutrition, hydration, and schedule problems before they compound.</div></div></div>
+      <div class="metric-row"><div class="metric-icon">🚫</div><div class="metric-name">DISTRACTIONS</div><div><div class="metric-desc">How many times did you break focus or reach for your phone?</div><div class="metric-why">↳ Awareness of the number alone reduces it by 20-30% per week.</div></div></div>
+      <div class="metric-row"><div class="metric-icon">💪</div><div class="metric-name">WORKOUT_DONE</div><div><div class="metric-desc">Yes or No. Duration in minutes.</div><div class="metric-why">↳ Physical training is non-negotiable for cognitive performance. Log it.</div></div></div>
+    </div>
+
+    <div class="acc-grid">
+      <div class="acc-card" style="border-left:3px solid #22c55e">
+        <div class="acc-icon">🟢</div>
+        <div>
+          <div class="acc-name" style="color:#22c55e">GREEN DAY — 6 to 8 blocks completed</div>
+          <div class="acc-desc">Full execution. Log what worked. Reinforce the wins. Add one marginal improvement for tomorrow.</div>
+        </div>
+      </div>
+      <div class="acc-card" style="border-left:3px solid var(--accent2)">
+        <div class="acc-icon">🟡</div>
+        <div>
+          <div class="acc-name" style="color:var(--accent2)">AMBER DAY — 4 to 5 blocks completed</div>
+          <div class="acc-desc">Identify which blocks failed and exactly why. Adjust tomorrow's architecture. No self-punishment — only diagnosis and correction.</div>
+        </div>
+      </div>
+      <div class="acc-card" style="border-left:3px solid var(--accent)">
+        <div class="acc-icon">🔴</div>
+        <div>
+          <div class="acc-name" style="color:var(--accent)">RED DAY — below 4 blocks</div>
+          <div class="acc-desc">Full root cause analysis required. Was it sleep? Environment? Emotional state? Tomorrow begins at 5:00 AM with no exceptions. The chain continues.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="warn">
+      <strong>📡 HOW WE OPERATE TOGETHER</strong>
+      Report your daily metrics every evening. Tell me: blocks completed, wake time, focus quality, what you studied, and today's biggest failure. I will analyze the pattern, not just the single day. I will push you when you're coasting and correct the architecture when something isn't working. I am not here to comfort you. I am here to make you pass.
+    </div>
+
+    <div class="template-box">
+      <div class="template-label">// DAILY REPORT TEMPLATE — COPY AND FILL EACH EVENING</div>
+<pre>DATE: ___________
+WAKE TIME: _____  (target: 05:00)
+BLOCKS COMPLETED: ___ / 8
+
+BLOCK BREAKDOWN:
+  B1 (5:30):  ✅/❌  Focus: __/10  Subject: __________
+  B2 (7:10):  ✅/❌  Focus: __/10  Subject: __________
+  B3 (9:00):  ✅/❌  Focus: __/10  Subject: __________
+  B4 (10:40): ✅/❌  Focus: __/10  Subject: __________
+  B5 (13:00): ✅/❌  Focus: __/10  Subject: __________
+  B6 (14:45): ✅/❌  Focus: __/10  Subject: __________
+  B7 (16:45): ✅/❌  Focus: __/10  Subject: __________
+  B8 (18:45): ✅/❌  Focus: __/10  Subject: __________
+
+MATERIAL COVERED: ______________________
+WORKOUT: YES / NO   Duration: ___ min
+SLEEP (last night): ___hrs   Quality: __/10
+ENERGY: 9AM:__  1PM:__  5PM:__  9PM:__
+DISTRACTIONS COUNT: ___
+BIGGEST FAILURE TODAY: ________________
+TOMORROW'S PRIORITY: __________________
+DAY STATUS: 🟢 GREEN / 🟡 AMBER / 🔴 RED</pre>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 5: POMODORO -->
+<div id="tab-pomodoro" class="tab-content hidden">
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">MODULE 05</span>
+      <div><div class="section-title">POMODORO TIMER</div><div class="section-desc">25-minute deep work intervals. Biology-aligned focus engine.</div></div>
+    </div>
+
+    <div class="pomo-wrap">
+
+      <!-- MODE SELECTOR -->
+      <div class="pomo-modes">
+        <button class="pomo-mode-btn active" id="btn-work" onclick="setMode('work')">Work · 25min</button>
+        <button class="pomo-mode-btn" id="btn-short" onclick="setMode('short')">Short Break · 5min</button>
+        <button class="pomo-mode-btn" id="btn-long" onclick="setMode('long')">Long Break · 15min</button>
+      </div>
+
+      <!-- CLOCK -->
+      <div class="pomo-clock-wrap">
+        <svg class="pomo-svg" width="260" height="260" viewBox="0 0 260 260">
+          <circle class="pomo-track" cx="130" cy="130" r="118"/>
+          <circle class="pomo-progress" id="pomo-ring" cx="130" cy="130" r="118"
+            stroke="var(--accent)"
+            stroke-dasharray="741.1"
+            stroke-dashoffset="0"/>
+        </svg>
+        <div class="pomo-center">
+          <div class="pomo-time" id="pomo-display">25:00</div>
+          <div class="pomo-label" id="pomo-phase-label">FOCUS</div>
+        </div>
+      </div>
+
+      <!-- CONTROLS -->
+      <div class="pomo-controls">
+        <button class="pomo-btn" onclick="resetTimer()">↺ RESET</button>
+        <button class="pomo-btn primary" id="pomo-start-btn" onclick="toggleTimer()">▶ START</button>
+        <button class="pomo-btn" onclick="skipSession()">SKIP ▷</button>
+      </div>
+      <div class="pomo-kbd">Press <kbd>Space</kbd> to start / pause &nbsp;·&nbsp; <kbd>R</kbd> to reset</div>
+
+      <!-- SESSION DOTS -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+        <div class="pomo-sessions" id="pomo-dots">
+          <div class="pomo-dot" id="d0"></div>
+          <div class="pomo-dot" id="d1"></div>
+          <div class="pomo-dot" id="d2"></div>
+          <div class="pomo-dot" id="d3"></div>
+        </div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1px">SESSION PROGRESS — 4 POMODOROS = LONG BREAK</div>
+      </div>
+
+      <!-- STATS -->
+      <div class="pomo-stats-row">
+        <div class="pomo-stat"><div class="pomo-stat-val" id="stat-today">0</div><div class="pomo-stat-label">Today</div></div>
+        <div class="pomo-stat"><div class="pomo-stat-val" id="stat-total">0</div><div class="pomo-stat-label">All Time</div></div>
+        <div class="pomo-stat"><div class="pomo-stat-val" id="stat-focus">0h 0m</div><div class="pomo-stat-label">Focus Time</div></div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="pomo-settings">
+        <div class="pomo-settings-title">// TIMER SETTINGS</div>
+        <div class="pomo-setting-row">
+          <div class="pomo-setting-label">Work Duration</div>
+          <div class="pomo-setting-controls">
+            <button class="pomo-adj" onclick="adjustSetting('work',-1)">−</button>
+            <div class="pomo-adj-val" id="set-work">25</div>
+            <button class="pomo-adj" onclick="adjustSetting('work',1)">+</button>
+            <span style="font-family:var(--mono);font-size:10px;color:var(--muted)">MIN</span>
+          </div>
+        </div>
+        <div class="pomo-setting-row">
+          <div class="pomo-setting-label">Short Break</div>
+          <div class="pomo-setting-controls">
+            <button class="pomo-adj" onclick="adjustSetting('short',-1)">−</button>
+            <div class="pomo-adj-val" id="set-short">5</div>
+            <button class="pomo-adj" onclick="adjustSetting('short',1)">+</button>
+            <span style="font-family:var(--mono);font-size:10px;color:var(--muted)">MIN</span>
+          </div>
+        </div>
+        <div class="pomo-setting-row">
+          <div class="pomo-setting-label">Long Break</div>
+          <div class="pomo-setting-controls">
+            <button class="pomo-adj" onclick="adjustSetting('long',-1)">−</button>
+            <div class="pomo-adj-val" id="set-long">15</div>
+            <button class="pomo-adj" onclick="adjustSetting('long',1)">+</button>
+            <span style="font-family:var(--mono);font-size:10px;color:var(--muted)">MIN</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</div><!-- end content -->
+</div><!-- end app -->
+
+<script>
+// TAB SWITCHING
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.remove('hidden');
+  btn.classList.add('active');
+}
+
+// TIMELINE DATA
+const TL = [
+  {t:"5:00",title:"WAKE + WATER + LIGHT",desc:"Hard alarm. 500ml water immediately. Step outside for sunlight. Zero phone.",tag:"ANCHOR",type:"anchor"},
+  {t:"5:15",title:"EXECUTION SHEET",desc:"Write today's target, study blocks, and pre-planned response to one anticipated obstacle.",tag:"ANCHOR",type:"anchor"},
+  {t:"5:30",title:"DEEP WORK BLOCK 1",desc:"90 min · Maximum difficulty material. Hardest concepts. Highest cognitive stakes.",tag:"DEEP WORK",type:"deep"},
+  {t:"7:00",title:"MICRO-REST",desc:"10 min · Walk or light stretch. No screens. Let the brain consolidate.",tag:"REST",type:"rest"},
+  {t:"7:10",title:"DEEP WORK BLOCK 2",desc:"90 min · Continue hard material or begin challenging exercise sets.",tag:"DEEP WORK",type:"deep"},
+  {t:"8:40",title:"BREAKFAST",desc:"20 min · Protein + complex carbs. Minimal sugar. Eat, don't scroll.",tag:"FUEL",type:"fuel"},
+  {t:"9:00",title:"DEEP WORK BLOCK 3",desc:"90 min · New subject or begin spaced repetition of earlier blocks.",tag:"DEEP WORK",type:"deep"},
+  {t:"10:30",title:"MICRO-REST",desc:"10 min · Eyes closed. No input. Brain is actively processing what you just studied.",tag:"REST",type:"rest"},
+  {t:"10:40",title:"DEEP WORK BLOCK 4",desc:"80 min · Problem sets, past exam papers, timed practice problems.",tag:"DEEP WORK",type:"deep"},
+  {t:"12:00",title:"LUNCH + WALK",desc:"40 min · Real meal. Walk outside. Longest break of the day — you've earned it.",tag:"FUEL",type:"fuel"},
+  {t:"12:40",title:"TACTICAL NAP",desc:"20 min MAX. Set alarm. Not 25, not 30. Exactly 20 min. Prevents the afternoon crash.",tag:"REST",type:"rest"},
+  {t:"13:00",title:"DEEP WORK BLOCK 5",desc:"90 min · THIS IS THE WAR ZONE. Mid-afternoon dip. Push through it harder than any other block.",tag:"DEEP WORK",type:"deep"},
+  {t:"14:30",title:"RECOVERY BREAK",desc:"15 min · Cold water on face. Light snack if needed. Breathing reset.",tag:"REST",type:"rest"},
+  {t:"14:45",title:"DEEP WORK BLOCK 6",desc:"75 min · Review, mind-maps, synthesis of the day's learning so far.",tag:"DEEP WORK",type:"deep"},
+  {t:"16:00",title:"PHYSICAL TRAINING",desc:"45 min · Jump rope or strength. Not optional. Clears cortisol and re-oxygenates the brain.",tag:"ANCHOR",type:"anchor"},
+  {t:"16:45",title:"DEEP WORK BLOCK 7",desc:"90 min · Formula review, theorem proofs, more mock problems.",tag:"DEEP WORK",type:"deep"},
+  {t:"18:15",title:"DINNER",desc:"30 min · Eat. Rest. Zero study content during this window.",tag:"FUEL",type:"fuel"},
+  {t:"18:45",title:"DEEP WORK BLOCK 8",desc:"75 min · Final heavy material or difficult problem-solving session.",tag:"DEEP WORK",type:"deep"},
+  {t:"20:00",title:"CONSOLIDATION",desc:"45 min · Active recall: cover the page, write what you remember. Spaced repetition cards.",tag:"DEEP WORK",type:"deep"},
+  {t:"20:45",title:"DAILY DEBRIEF",desc:"15 min · Score the day. Fill the report template. Identify failures. Plan tomorrow.",tag:"ANCHOR",type:"anchor"},
+  {t:"21:00",title:"WIND-DOWN",desc:"60 min · Dim lights. No screens. Reading or light walking only.",tag:"REST",type:"rest"},
+  {t:"22:00",title:"SLEEP",desc:"Non-negotiable. 7 hours minimum. Sleep is when memory consolidates. This is study time.",tag:"ANCHOR",type:"anchor"},
+];
+
+const tlEl = document.getElementById('timeline');
+TL.forEach(b => {
+  tlEl.innerHTML += `
+    <div class="tl-block">
+      <div class="tl-time">${b.t}</div>
+      <div class="tl-dot dot-${b.type}"></div>
+      <div style="flex:1;margin-left:14px;margin-bottom:3px">
+        <div class="tl-card">
+          <div class="tl-title title-${b.type}">${b.title}</div>
+          <div class="tl-desc">${b.desc}</div>
+          <span class="tl-tag tag-${b.type}">${b.tag}</span>
+        </div>
+      </div>
+    </div>`;
+});
+
+// FRICTION DATA
+const FRICTIONS = [
+  {
+    level:"high",name:"The Mid-Afternoon Wall (13:00–15:00)",
+    science:"The post-prandial dip is a circadian rhythm event — your core body temperature drops and adenosine accumulates ~7 hours after waking. This is biological, not laziness.",
+    protocols:["20-min tactical nap at 12:40 before Block 5 starts. Set a hard alarm.","Cold water on the back of your neck for 30 seconds before Block 5.","Re-read your Daily Execution Sheet — your 'why' anchors you when motivation disappears.","Stand up and study for the first 10 minutes of this block if you need to.","Put on binaural beats (40Hz gamma) — measurable effect on alertness in research settings."]
+  },
+  {
+    level:"high",name:"Motivation Death (Day 3–7 of New Schedule)",
+    science:"Dopamine anticipation spikes on Day 1. By Day 3, novelty fades. The brain has not yet built the habit loop. This is the highest dropout window.",
+    protocols:["Motivation is irrelevant. Systems execute when motivation fails. The schedule IS the motivation.","Use temptation bundling: pair a small reward (tea, specific music) with study blocks.","Track a streak counter — breaking a visual chain causes loss aversion stronger than any motivation.","If you miss a block: don't skip the next one. One missed block is an accident. Two is a pattern.","Review your exam goal every morning. Make it specific and visceral."]
+  },
+  {
+    level:"high",name:"Phone and Social Media Pull",
+    science:"Smartphones trigger variable-ratio reinforcement — the same mechanism as slot machines. Each notification creates a dopamine anticipation spike that hijacks prefrontal attention.",
+    protocols:["Phone goes in another room during study blocks. Physical distance is the only reliable solution.","Use app blockers (Forest, Cold Turkey, Digital Wellbeing) during study windows.","Designate only two phone-check windows per day: 8:40 AM break and 18:15 dinner.","If you catch yourself reaching for the phone, log it on paper. Awareness breaks the automaticity."]
+  },
+  {
+    level:"med",name:"Decision Fatigue and Task Avoidance",
+    science:"The prefrontal cortex uses glucose rapidly. After 2-3 hours of difficult decisions, willpower measurably degrades. Ego depletion is real and predictable.",
+    protocols:["Pre-decide everything the night before: what to study, which exercises, which page.","Start each block by opening the book to the exact page — reduce starting friction to zero.","Use the 2-minute rule: commit to doing just 2 minutes. Almost always continues past that.","Eat stable meals — blood glucose swings amplify decision fatigue and emotional reactivity."]
+  },
+  {
+    level:"med",name:"Mental Fatigue vs Real Fatigue",
+    science:"Most perceived mental fatigue is emotional and motivational — your brain is protecting itself from effort, not actually depleted. True cognitive exhaustion requires 6+ continuous hours of work.",
+    protocols:["When you feel done, you are usually at 60-70% actual capacity. Sit 5 more minutes.","Change the study method (reading → problem-solving) rather than stopping entirely.","Use body-doubling: study with someone, or use YouTube study-with-me videos.","Real fatigue looks like inability to recall simple things, physical heaviness, declining accuracy. That is when you stop."]
+  },
+  {
+    level:"med",name:"Sleep Discipline Failure (Staying Up Late)",
+    science:"Sleep deprivation destroys hippocampal consolidation — you literally erase the learning from the day before. One bad night reduces next-day cognitive performance by 20-40%.",
+    protocols:["10 PM is a hard stop. No 'just one more hour.' That hour costs you 4 hours of performance tomorrow.","Dim all lights after 21:00. Blue light suppresses melatonin and delays sleep onset by 90+ minutes.","No screens 60 minutes before sleep — the single highest ROI habit for sleep quality.","Stick to the same wake time even after a bad night. Recovery is faster than breaking the rhythm."]
+  }
+];
+
+const fl = document.getElementById('friction-list');
+FRICTIONS.forEach((f,i) => {
+  fl.innerHTML += `
+    <div class="friction-card">
+      <div class="friction-header" onclick="toggleFriction(${i})">
+        <span class="friction-badge badge-${f.level}">${f.level==='high'?'HIGH RISK':'MED RISK'}</span>
+        <span class="friction-name">${f.name}</span>
+        <span class="friction-arrow" id="arr-${i}">▼</span>
+      </div>
+      <div class="friction-body" id="fb-${i}">
+        <div class="friction-science">🔬 ${f.science}</div>
+        <ul class="protocol-list">
+          ${f.protocols.map(p=>`<li>${p}</li>`).join('')}
+        </ul>
+      </div>
+    </div>`;
+});
+
+function toggleFriction(i) {
+  const body = document.getElementById('fb-'+i);
+  const arr = document.getElementById('arr-'+i);
+  body.classList.toggle('open');
+  arr.classList.toggle('open');
+}
+
+/* ===== POMODORO ===== */
+const CIRCUMFERENCE = 2 * Math.PI * 118; // 741.1
+
+const settings = { work: 25, short: 5, long: 15 };
+let currentMode = 'work';
+let totalSeconds = 25 * 60;
+let remainingSeconds = totalSeconds;
+let timerInterval = null;
+let isRunning = false;
+let sessionCount = 0; // 0–3 within a cycle of 4
+let todayCount = parseInt(localStorage.getItem('pomo_today') || '0');
+let todayDate = localStorage.getItem('pomo_date') || '';
+let totalCount = parseInt(localStorage.getItem('pomo_total') || '0');
+
+// Reset today count if it's a new day
+const today = new Date().toDateString();
+if (todayDate !== today) { todayCount = 0; localStorage.setItem('pomo_date', today); localStorage.setItem('pomo_today', '0'); }
+
+const COLORS = { work: 'var(--accent)', short: 'var(--accent3)', long: '#a78bfa' };
+const LABELS = { work: 'FOCUS', short: 'SHORT BREAK', long: 'LONG BREAK' };
+
+function setMode(mode, skipReset) {
+  currentMode = mode;
+  document.querySelectorAll('.pomo-mode-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-' + mode).classList.add('active');
+  document.getElementById('pomo-ring').style.stroke = COLORS[mode];
+  document.getElementById('pomo-phase-label').textContent = LABELS[mode];
+  if (!skipReset) resetTimer();
+}
+
+function updateDisplay() {
+  const m = Math.floor(remainingSeconds / 60);
+  const s = remainingSeconds % 60;
+  document.getElementById('pomo-display').textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  const progress = 1 - (remainingSeconds / totalSeconds);
+  const offset = CIRCUMFERENCE * progress;
+  document.getElementById('pomo-ring').style.strokeDashoffset = offset;
+}
+
+function resetTimer() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  isRunning = false;
+  totalSeconds = settings[currentMode] * 60;
+  remainingSeconds = totalSeconds;
+  document.getElementById('pomo-start-btn').textContent = '▶ START';
+  document.getElementById('pomo-ring').style.strokeDashoffset = 0;
+  updateDisplay();
+}
+
+function toggleTimer() {
+  if (isRunning) {
+    clearInterval(timerInterval);
+    isRunning = false;
+    document.getElementById('pomo-start-btn').textContent = '▶ RESUME';
+  } else {
+    isRunning = true;
+    document.getElementById('pomo-start-btn').textContent = '⏸ PAUSE';
+    timerInterval = setInterval(() => {
+      remainingSeconds--;
+      updateDisplay();
+      if (remainingSeconds <= 0) {
+        clearInterval(timerInterval);
+        isRunning = false;
+        onSessionEnd();
+      }
+    }, 1000);
+  }
+}
+
+function onSessionEnd() {
+  playBeep();
+  if (currentMode === 'work') {
+    todayCount++; totalCount++; sessionCount++;
+    localStorage.setItem('pomo_today', todayCount);
+    localStorage.setItem('pomo_total', totalCount);
+    updateStats();
+    updateDots();
+    if (sessionCount >= 4) { sessionCount = 0; updateDots(); setMode('long'); }
+    else { setMode('short'); }
+  } else {
+    setMode('work');
+  }
+}
+
+function skipSession() { onSessionEnd(); }
+
+function updateDots() {
+  for (let i = 0; i < 4; i++) {
+    document.getElementById('d' + i).classList.toggle('done', i < sessionCount);
+  }
+}
+
+function updateStats() {
+  document.getElementById('stat-today').textContent = todayCount;
+  document.getElementById('stat-total').textContent = totalCount;
+  const mins = totalCount * settings.work;
+  document.getElementById('stat-focus').textContent = Math.floor(mins/60) + 'h ' + (mins % 60) + 'm';
+}
+
+function adjustSetting(key, delta) {
+  const min = key === 'work' ? 5 : 1;
+  const max = key === 'work' ? 90 : key === 'long' ? 60 : 30;
+  settings[key] = Math.max(min, Math.min(max, settings[key] + delta));
+  document.getElementById('set-' + key).textContent = settings[key];
+  if (key === currentMode) resetTimer();
+}
+
+function playBeep() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [0, 0.25, 0.5].forEach(delay => {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value = 880;
+      o.type = 'sine';
+      g.gain.setValueAtTime(0.3, ctx.currentTime + delay);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.2);
+      o.start(ctx.currentTime + delay);
+      o.stop(ctx.currentTime + delay + 0.25);
+    });
+  } catch(e) {}
+}
+
+document.addEventListener('keydown', e => {
+  if (document.getElementById('tab-pomodoro').classList.contains('hidden')) return;
+  if (e.code === 'Space' && e.target === document.body) { e.preventDefault(); toggleTimer(); }
+  if (e.code === 'KeyR' && e.target === document.body) { resetTimer(); }
+});
+
+updateDisplay();
+updateStats();
+updateDots();
+
+</script>
+</body>
+</html>
