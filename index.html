@@ -215,6 +215,14 @@ pre{font-family:var(--mono);font-size:12px;color:var(--text);line-height:1.9;whi
 .pomo-stat-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:3px}
 .pomo-settings{width:100%;max-width:420px;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:18px}
 .pomo-settings-title{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:16px}
+.pomo-presets{display:flex;gap:8px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.pomo-preset{
+  flex:1;background:none;border:1px solid var(--border);border-radius:3px;cursor:pointer;
+  font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;
+  color:var(--muted);padding:8px 6px;transition:all .2s;text-align:center;
+}
+.pomo-preset:hover{border-color:var(--accent2);color:var(--accent2)}
+.pomo-preset.active-preset{border-color:var(--accent2);color:var(--accent2);background:rgba(244,162,97,.08)}
 .pomo-setting-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
 .pomo-setting-row:last-child{border-bottom:none}
 .pomo-setting-label{font-size:13px;color:var(--text)}
@@ -224,6 +232,18 @@ pre{font-family:var(--mono);font-size:12px;color:var(--text);line-height:1.9;whi
 .pomo-adj-val{font-family:var(--mono);font-size:13px;color:var(--white);min-width:32px;text-align:center}
 .pomo-kbd{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:8px}
 .pomo-kbd kbd{background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:2px 7px;font-family:var(--mono);font-size:10px;color:var(--text)}
+
+/* PIP LAUNCH BUTTON */
+.pip-trigger{
+  position:fixed;bottom:24px;right:24px;z-index:999;
+  background:var(--accent);border:none;border-radius:4px;cursor:pointer;
+  font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--white);padding:11px 18px;display:flex;align-items:center;gap:9px;
+  box-shadow:0 4px 24px rgba(230,57,70,.35);transition:background .2s,transform .2s;
+}
+.pip-trigger:hover{background:#c1121f;transform:translateY(-2px)}
+.pip-trigger-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.7);flex-shrink:0}
+.pip-trigger-dot.running{background:#fff;animation:pulse 1s infinite}
 </style>
 </head>
 <body>
@@ -515,6 +535,11 @@ DAY STATUS: 🟢 GREEN / 🟡 AMBER / 🔴 RED</pre>
       <!-- SETTINGS -->
       <div class="pomo-settings">
         <div class="pomo-settings-title">// TIMER SETTINGS</div>
+        <div class="pomo-presets">
+          <button class="pomo-preset" onclick="applyPreset(25,5,15)" id="preset-25">25 / 5 / 15<br><span style="font-size:9px;color:var(--muted)">Classic</span></button>
+          <button class="pomo-preset" onclick="applyPreset(60,10,20)" id="preset-60">60 / 10 / 20<br><span style="font-size:9px;color:var(--muted)">Deep Work</span></button>
+          <button class="pomo-preset" onclick="applyPreset(90,15,30)" id="preset-90">90 / 15 / 30<br><span style="font-size:9px;color:var(--muted)">Ultradian</span></button>
+        </div>
         <div class="pomo-setting-row">
           <div class="pomo-setting-label">Work Duration</div>
           <div class="pomo-setting-controls">
@@ -766,7 +791,25 @@ function adjustSetting(key, delta) {
   const max = key === 'work' ? 90 : key === 'long' ? 60 : 30;
   settings[key] = Math.max(min, Math.min(max, settings[key] + delta));
   document.getElementById('set-' + key).textContent = settings[key];
+  if (key === 'work') {
+    document.getElementById('btn-work').textContent = 'Work · ' + settings.work + 'min';
+    document.querySelectorAll('.pomo-preset').forEach(b => b.classList.remove('active-preset'));
+  }
   if (key === currentMode) resetTimer();
+}
+
+function applyPreset(work, short, long) {
+  settings.work = work; settings.short = short; settings.long = long;
+  document.getElementById('set-work').textContent = work;
+  document.getElementById('set-short').textContent = short;
+  document.getElementById('set-long').textContent = long;
+  document.getElementById('btn-work').textContent = 'Work · ' + work + 'min';
+  document.getElementById('btn-short').textContent = 'Short Break · ' + short + 'min';
+  document.getElementById('btn-long').textContent = 'Long Break · ' + long + 'min';
+  document.querySelectorAll('.pomo-preset').forEach(b => b.classList.remove('active-preset'));
+  const id = work === 25 ? 'preset-25' : work === 60 ? 'preset-60' : 'preset-90';
+  document.getElementById(id).classList.add('active-preset');
+  resetTimer();
 }
 
 function playBeep() {
@@ -796,6 +839,175 @@ updateDisplay();
 updateStats();
 updateDots();
 
+/* ===== DOCUMENT PICTURE-IN-PICTURE ===== */
+let pipWin = null;
+let pipEl = {}; // refs to elements inside PiP window
+
+const PIP_CIRC = 2 * Math.PI * 80; // r=80 → 502.65
+const PIP_COLORS = { work:'#e63946', short:'#2a9d8f', long:'#a78bfa' };
+const PIP_LABELS = { work:'FOCUS', short:'SHORT BREAK', long:'LONG BREAK' };
+
+function pipGetHTML() {
+  const m = String(Math.floor(remainingSeconds/60)).padStart(2,'0');
+  const s = String(remainingSeconds%60).padStart(2,'0');
+  const progress = 1 - remainingSeconds / totalSeconds;
+  const offset = PIP_CIRC * progress;
+  const color = PIP_COLORS[currentMode];
+  return `
+<!DOCTYPE html><html><head><meta charset="UTF-8"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#080810;color:#d4d4e8;font-family:'IBM Plex Mono',monospace;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:20px;user-select:none}
+.modes{display:flex;gap:0;border:1px solid #1e1e35;border-radius:4px;overflow:hidden;width:100%}
+.mbtn{flex:1;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#6b6b8a;padding:8px 4px;transition:all .2s}
+.mbtn.active{color:#e63946;border-bottom-color:#e63946}
+.clock-wrap{position:relative;width:200px;height:200px}
+svg{transform:rotate(-90deg)}
+.track{fill:none;stroke:#1e1e35;stroke-width:8}
+.ring{fill:none;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset .9s linear}
+.center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.time{font-family:'Bebas Neue',sans-serif;font-size:64px;letter-spacing:3px;color:#f0f0ff;line-height:1}
+.phase{font-size:9px;letter-spacing:2px;color:#6b6b8a;text-transform:uppercase}
+.controls{display:flex;gap:10px;width:100%}
+.btn{flex:1;background:#0f0f1a;border:1px solid #1e1e35;border-radius:3px;cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#d4d4e8;padding:10px 8px;transition:all .2s}
+.btn:hover{border-color:#e63946;color:#e63946}
+.btn.primary{background:#e63946;border-color:#e63946;color:#fff;flex:2}
+.btn.primary:hover{background:#c1121f}
+.dots{display:flex;gap:8px;justify-content:center}
+.dot{width:10px;height:10px;border-radius:50%;border:1px solid rgba(255,255,255,.15);background:transparent;transition:background .3s}
+.dot.done{background:#e63946}
+.stats{display:flex;gap:0;border:1px solid #1e1e35;border-radius:4px;overflow:hidden;width:100%}
+.stat{flex:1;padding:10px 6px;text-align:center;border-right:1px solid #1e1e35}
+.stat:last-child{border-right:none}
+.sv{font-family:'Bebas Neue',sans-serif;font-size:22px;color:#e63946}
+.sl{font-size:8px;color:#6b6b8a;letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+</style></head>
+<body>
+<div class="modes">
+  <button class="mbtn ${currentMode==='work'?'active':''}" id="pip-m-work" onclick="window._pipSetMode('work')">Work</button>
+  <button class="mbtn ${currentMode==='short'?'active':''}" id="pip-m-short" onclick="window._pipSetMode('short')">Short</button>
+  <button class="mbtn ${currentMode==='long'?'active':''}" id="pip-m-long" onclick="window._pipSetMode('long')">Long</button>
+</div>
+<div class="clock-wrap">
+  <svg width="200" height="200" viewBox="0 0 200 200">
+    <circle class="track" cx="100" cy="100" r="80"/>
+    <circle class="ring" id="pip-ring" cx="100" cy="100" r="80"
+      stroke="${color}" stroke-dasharray="${PIP_CIRC.toFixed(2)}" stroke-dashoffset="${offset.toFixed(2)}"/>
+  </svg>
+  <div class="center">
+    <div class="time" id="pip-time">${m}:${s}</div>
+    <div class="phase" id="pip-phase">${PIP_LABELS[currentMode]}</div>
+  </div>
+</div>
+<div class="controls">
+  <button class="btn" onclick="window._pipReset()">↺</button>
+  <button class="btn primary" id="pip-play-btn" onclick="window._pipToggle()">${isRunning?'⏸ PAUSE':'▶ START'}</button>
+  <button class="btn" onclick="window._pipSkip()">▷</button>
+</div>
+<div class="dots">
+  <div class="dot ${sessionCount>0?'done':''}" id="pip-d0"></div>
+  <div class="dot ${sessionCount>1?'done':''}" id="pip-d1"></div>
+  <div class="dot ${sessionCount>2?'done':''}" id="pip-d2"></div>
+  <div class="dot ${sessionCount>3?'done':''}" id="pip-d3"></div>
+</div>
+<div class="stats">
+  <div class="stat"><div class="sv" id="pip-s-today">${todayCount}</div><div class="sl">Today</div></div>
+  <div class="stat"><div class="sv" id="pip-s-total">${totalCount}</div><div class="sl">Total</div></div>
+  <div class="stat"><div class="sv" id="pip-s-focus">${totalCount*settings.work>=60?Math.floor(totalCount*settings.work/60)+'h':totalCount*settings.work+'m'}</div><div class="sl">Focus</div></div>
+</div>
+</body></html>`;
+}
+
+function pipSync() {
+  if (!pipWin || pipWin.closed) return;
+  const d = pipWin.document;
+  const m = String(Math.floor(remainingSeconds/60)).padStart(2,'0');
+  const s = String(remainingSeconds%60).padStart(2,'0');
+  const progress = 1 - remainingSeconds / totalSeconds;
+  const offset = PIP_CIRC * progress;
+  const color = PIP_COLORS[currentMode];
+  const t = d.getElementById('pip-time');
+  const r = d.getElementById('pip-ring');
+  const ph = d.getElementById('pip-phase');
+  const pb = d.getElementById('pip-play-btn');
+  if (t) t.textContent = m + ':' + s;
+  if (r) { r.style.strokeDashoffset = offset; r.style.stroke = color; }
+  if (ph) ph.textContent = PIP_LABELS[currentMode];
+  if (pb) pb.textContent = isRunning ? '⏸ PAUSE' : '▶ START';
+  // dots
+  for (let i = 0; i < 4; i++) {
+    const dot = d.getElementById('pip-d' + i);
+    if (dot) dot.className = 'dot' + (i < sessionCount ? ' done' : '');
+  }
+  // mode buttons
+  ['work','short','long'].forEach(mo => {
+    const mb = d.getElementById('pip-m-' + mo);
+    if (mb) mb.className = 'mbtn' + (mo === currentMode ? ' active' : '');
+  });
+  // stats
+  const st = d.getElementById('pip-s-today');
+  const stot = d.getElementById('pip-s-total');
+  const sf = d.getElementById('pip-s-focus');
+  if (st) st.textContent = todayCount;
+  if (stot) stot.textContent = totalCount;
+  if (sf) { const mins = totalCount*settings.work; sf.textContent = mins>=60?Math.floor(mins/60)+'h':mins+'m'; }
+  // trigger button label
+  const trig = document.getElementById('pip-trigger-dot');
+  if (trig) trig.className = 'pip-trigger-dot' + (isRunning ? ' running' : '');
+}
+
+// Hook into existing timer functions to also sync PiP
+const _origUpdateDisplay = updateDisplay;
+updateDisplay = function() { _origUpdateDisplay(); pipSync(); };
+
+const _origSetMode = setMode;
+setMode = function(mode, skip) { _origSetMode(mode, skip); pipSync(); };
+
+const _origOnSessionEnd = onSessionEnd;
+onSessionEnd = function() { _origOnSessionEnd(); pipSync(); };
+
+async function launchPiP() {
+  if (!('documentPictureInPicture' in window)) {
+    alert('Picture-in-Picture is only supported in Chrome 116+.\n\nUpdate Chrome or use Chrome browser to use this feature.');
+    return;
+  }
+  // Close existing PiP if open
+  if (pipWin && !pipWin.closed) { pipWin.close(); pipWin = null; return; }
+
+  try {
+    pipWin = await window.documentPictureInPicture.requestWindow({ width: 280, height: 460 });
+    pipWin.document.open();
+    pipWin.document.write(pipGetHTML());
+    pipWin.document.close();
+
+    // Expose control functions to PiP window
+    pipWin._pipToggle = () => { toggleTimer(); pipSync(); };
+    pipWin._pipReset  = () => { resetTimer();  pipSync(); };
+    pipWin._pipSkip   = () => { skipSession(); pipSync(); };
+    pipWin._pipSetMode = (mode) => { setMode(mode); pipSync(); };
+
+    pipWin.addEventListener('pagehide', () => { pipWin = null; });
+
+    document.getElementById('pip-trigger-label').textContent = '✕ CLOSE TIMER';
+    pipWin.addEventListener('pagehide', () => {
+      document.getElementById('pip-trigger-label').textContent = '⊞ POP OUT TIMER';
+    });
+  } catch(e) {
+    console.error('PiP failed:', e);
+    alert('Could not open Picture-in-Picture: ' + e.message);
+  }
+}
+
+
+
+
 </script>
+<!-- PIP LAUNCH BUTTON -->
+<button class="pip-trigger" id="pip-trigger-btn" onclick="launchPiP()" title="Open always-on-top Pomodoro (Picture-in-Picture)">
+  <div class="pip-trigger-dot" id="pip-trigger-dot"></div>
+  <span id="pip-trigger-label">⊞ POP OUT TIMER</span>
+</button>
+
 </body>
 </html>
